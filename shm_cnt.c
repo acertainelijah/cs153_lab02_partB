@@ -19,10 +19,11 @@ struct shm_cnt *counter;
 //shm_open: first process will create the page, the second will just attach to the same page
 //we get the virtual address of the page returned into counter
 //which we can now use but will be shared between the two processes
+printf(1,"%s calling shm_open now. Counter: %x\n", pid? "Child": "Parent", counter); 
   
 shm_open(1,(char **)&counter);
  
-//  printf(1,"%s returned successfully from shm_open with counter %x\n", pid? "Child": "Parent", counter); 
+printf(1,"%s returned successfully from shm_open with counter %x\n", pid? "Child": "Parent", counter); 
   for(i = 0; i < 10000; i++)
     {
      uacquire(&(counter->lock));
