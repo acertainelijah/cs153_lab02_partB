@@ -43,7 +43,7 @@ int shm_open(int id, char **pointer) {
     //acquire(&(shm_table.lock));
     if(shm_table.shm_pages[i].id == id) { //id exists
       //release(&(shm_table.lock));
-      cprintf("id exists in page table!"); 
+      cprintf("id exists in page table!\n"); 
       idExists = 1;
       //pageAddr == the physical address of the page in the table
       //pageAddr = shm_table.shm_pages[i].frame;
@@ -68,8 +68,8 @@ int shm_open(int id, char **pointer) {
     shm_table.shm_pages[tableIndex].refcnt++;
    // release(&(shm_table.lock));
    //TODO switch these? 
-    curproc->sz =+ PGSIZE; //not sure???
     *pointer = (char *)PGROUNDUP(curproc->sz); 
+    curproc->sz =+ PGSIZE; //not sure???
     //return (int)pointer;
     release(&(shm_table.lock));
     return 0;
@@ -80,16 +80,16 @@ int shm_open(int id, char **pointer) {
     cprintf("ID does not exist\n"); 
     
     for (i = 0; i< 64; i++) {
-      cprintf("begin of loop"); 
+      cprintf("begin of loop\n"); 
      // acquire(&(shm_table.lock));
       if(shm_table.shm_pages[i].refcnt == 0) { //if an empty table entry 
-        cprintf("refcnt == 0"); 
+        cprintf("refcnt == 0\n"); 
           //initialize empty entry in the shm_table id to the id passed to us
 	  shm_table.shm_pages[i].id = id;
           shm_table.shm_pages[i].frame = kalloc();
           
           memset(shm_table.shm_pages[i].frame, 0, PGSIZE);
-          cprintf("calling mappages");
+          cprintf("calling mappages\n");
     	  //if(mappages(curproc->pgdir, (void *)PGROUNDUP(KERNBASE - 4), PGSIZE, V2P(shm_table.shm_pages[i].frame), PTE_W|PTE_U) < 0){
     	  if(mappages(curproc->pgdir, (void *)PGROUNDUP(curproc->sz), PGSIZE, V2P(shm_table.shm_pages[i].frame), PTE_W|PTE_U) < 0){
       	    cprintf("allocuvm out of memory (2)\n");
@@ -99,10 +99,11 @@ int shm_open(int id, char **pointer) {
       	    return 0;
     	  } 
 	  else {
+            cprintf("finished with mappages\n");
             release(&(shm_table.lock));
-            curproc->sz += PGSIZE;
+            //curproc->sz += PGSIZE;
             *pointer = (char *)PGROUNDUP(curproc->sz);
-             cprintf("page has updated!");
+             cprintf("page has updated!\n");
 	     return 0;
           }
           //release(&(shm_table.lock));
