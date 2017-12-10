@@ -41,7 +41,7 @@ int shm_open(int id, char **pointer) {
 
   for (i = 0; i< 64; i++) {
     //id exists
-    acquire(&(shm_table.lock));
+    //acquire(&(shm_table.lock));
     if(shm_table.shm_pages[i].id == id) {
 //      release(&(shm_table.lock));
       cprintf("id exists in page table!"); 
@@ -51,7 +51,7 @@ int shm_open(int id, char **pointer) {
       tableIndex = i;
       break;
     }
-    release(&(shm_table.lock));
+    //release(&(shm_table.lock));
   }
   
   //Case 1: id exists
@@ -61,18 +61,20 @@ int shm_open(int id, char **pointer) {
     //takes physical address of page in the table and maps it to an available page in our va space
     // mappages(curproc->pgdir, (void *)PGROUNDUP(curproc->sz), PGSIZE, V2P(pageAddr), PTE_W|PTE_U);
     // mappages(curproc->pgdir, (void *)PGROUNDUP(KERNBASE - 4), PGSIZE, V2P(pageAddr), PTE_W|PTE_U);
-    acquire(&(shm_table.lock));
+    //acquire(&(shm_table.lock));
     mappages(curproc->pgdir, (void *)PGROUNDUP(KERNBASE - 4), PGSIZE, V2P(shm_table.shm_pages[tableIndex].frame), PTE_W|PTE_U); 
 
     //increase refcnt by 1
     shm_table.shm_pages[tableIndex].refcnt++;
-    release(&(shm_table.lock));
+   // release(&(shm_table.lock));
     
     curproc->sz =+ PGSIZE; //not sure???
     *pointer = (char *)PGROUNDUP(curproc->sz); 
     //return (int)pointer;
+    release(&(shm_table.lock));
     return 0;
   }
+
   //Case 2: id does NOT exist
   else{ 
     cprintf("ID does not exist\n"); 
@@ -81,7 +83,7 @@ int shm_open(int id, char **pointer) {
     
     for (i = 0; i< 64; i++) {
       cprintf("begin of loop"); 
-      acquire(&(shm_table.lock));
+     // acquire(&(shm_table.lock));
       if(shm_table.shm_pages[i].refcnt == 0) { //if an empty table entry 
         cprintf("refcnt == 0"); 
         a = PGROUNDUP(KERNBASE - 4);
@@ -92,12 +94,12 @@ int shm_open(int id, char **pointer) {
       	    deallocuvm(curproc->pgdir, 0, KERNBASE - 4);
       	    return 0;
         }
-        release(&(shm_table.lock));
+       // release(&(shm_table.lock));
           //initialize empty entry in the shm_table id to the id passed to us
-          acquire(&(shm_table.lock));
+         // acquire(&(shm_table.lock));
 	  shm_table.shm_pages[i].id = id;
           shm_table.shm_pages[i].frame = mem;
-          release(&(shm_table.lock));
+          //release(&(shm_table.lock));
           
           memset(mem, 0, PGSIZE);
           cprintf("calling mappages");
@@ -117,14 +119,16 @@ int shm_open(int id, char **pointer) {
         */
         }
       }
-      release(&(shm_table.lock));
+      //release(&(shm_table.lock));
         //return (int)pointer;
+//        release(&(shm_table.lock));
         return 0;
         break;
       }
      }   
       
     
+  release(&(shm_table.lock));
   return 0;
 }
       /*if(shm_table.shm_pages[i].refcnt == 0) { //if an empty table entry 

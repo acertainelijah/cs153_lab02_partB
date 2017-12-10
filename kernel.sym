@@ -1,7 +1,7 @@
 80100000 .text
-80107200 .rodata
-80107c60 .stab
-80107c61 .stabstr
+80107160 .rodata
+80107bc0 .stab
+80107bc1 .stabstr
 80108000 .data
 8010a520 .bss
 00000000 .debug_line
@@ -18,7 +18,7 @@
 8010a558 panicked
 801003f0 consputc
 80100580 printint
-80107270 digits.1612
+801071d0 digits.1612
 00000000 exec.c
 00000000 file.c
 00000000 fs.c
@@ -36,9 +36,9 @@
 00000000 kalloc.c
 00000000 kbd.c
 8010a5b4 shift.1453
-801075a0 shiftcode
-801074a0 togglecode
-80107480 charcode.1454
+80107500 shiftcode
+80107400 togglecode
+801073e0 charcode.1454
 80108200 normalmap
 80108100 shiftmap
 80108000 ctlmap
@@ -57,12 +57,12 @@
 801035b0 allocproc
 8010a000 first.1654
 8010a5b8 initproc
-80107860 states.1680
+801077c0 states.1680
 00000000 sleeplock.c
 00000000 spinlock.c
 00000000 string.c
 00000000 syscall.c
-801078e0 syscalls
+80107840 syscalls
 00000000 sysfile.c
 80104870 create
 80104a10 argfd.constprop.0
@@ -362,7 +362,7 @@
 8010569a alltraps
 801061e3 vector173
 80105f64 vector117
-80107180 shm_close
+801070f0 shm_close
 80105e29 vector82
 8010642f vector222
 80105b9d vector8
