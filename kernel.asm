@@ -10590,8 +10590,6 @@ myproc(void) {
 
   np->state = RUNNABLE;
 801039e5:	c7 47 0c 03 00 00 00 	movl   $0x3,0xc(%edi)
-  //cs153
-  //np->stack_sz = curproc->sz;
   release(&ptable.lock);
 801039ec:	c7 04 24 20 2d 11 80 	movl   $0x80112d20,(%esp)
 801039f3:	e8 c8 09 00 00       	call   801043c0 <release>

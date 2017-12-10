@@ -215,8 +215,6 @@ fork(void)
   acquire(&ptable.lock);
 
   np->state = RUNNABLE;
-  //cs153
-  //np->stack_sz = curproc->sz;
   release(&ptable.lock);
 
   return pid;
