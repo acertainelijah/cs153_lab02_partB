@@ -30,7 +30,6 @@ void shminit() {
 
 //cs153
 int shm_open(int id, char **pointer) {
-  //acquire(&(shm_table.lock));
   int i;
   struct proc *curproc = myproc(); 
   int idExists = 0;
@@ -39,11 +38,11 @@ int shm_open(int id, char **pointer) {
   //cprintf(pageAddr);
   //checks if the id already exists in shm_table
 
+  acquire(&(shm_table.lock));
   for (i = 0; i< 64; i++) {
-    //id exists
     //acquire(&(shm_table.lock));
-    if(shm_table.shm_pages[i].id == id) {
-//      release(&(shm_table.lock));
+    if(shm_table.shm_pages[i].id == id) { //id exists
+      //release(&(shm_table.lock));
       cprintf("id exists in page table!"); 
       idExists = 1;
       //pageAddr == the physical address of the page in the table
@@ -62,12 +61,13 @@ int shm_open(int id, char **pointer) {
     // mappages(curproc->pgdir, (void *)PGROUNDUP(curproc->sz), PGSIZE, V2P(pageAddr), PTE_W|PTE_U);
     // mappages(curproc->pgdir, (void *)PGROUNDUP(KERNBASE - 4), PGSIZE, V2P(pageAddr), PTE_W|PTE_U);
     //acquire(&(shm_table.lock));
-    mappages(curproc->pgdir, (void *)PGROUNDUP(KERNBASE - 4), PGSIZE, V2P(shm_table.shm_pages[tableIndex].frame), PTE_W|PTE_U); 
+    //mappages(curproc->pgdir, (void *)PGROUNDUP(KERNBASE - 4), PGSIZE, V2P(shm_table.shm_pages[tableIndex].frame), PTE_W|PTE_U); 
+    mappages(curproc->pgdir, (void *)PGROUNDUP(curproc->sz), PGSIZE, V2P(shm_table.shm_pages[tableIndex].frame), PTE_W|PTE_U); 
 
     //increase refcnt by 1
     shm_table.shm_pages[tableIndex].refcnt++;
    // release(&(shm_table.lock));
-    
+   //TODO switch these? 
     curproc->sz =+ PGSIZE; //not sure???
     *pointer = (char *)PGROUNDUP(curproc->sz); 
     //return (int)pointer;
@@ -78,56 +78,43 @@ int shm_open(int id, char **pointer) {
   //Case 2: id does NOT exist
   else{ 
     cprintf("ID does not exist\n"); 
-    uint a;
-    char *mem;   
     
     for (i = 0; i< 64; i++) {
       cprintf("begin of loop"); 
      // acquire(&(shm_table.lock));
       if(shm_table.shm_pages[i].refcnt == 0) { //if an empty table entry 
         cprintf("refcnt == 0"); 
-        a = PGROUNDUP(KERNBASE - 4);
-        for(; a > 0; a -= PGSIZE){
-    	  mem = kalloc();
-    	  if(mem == 0){
-      	    cprintf("allocuvm out of memory\n");
-      	    deallocuvm(curproc->pgdir, 0, KERNBASE - 4);
-      	    return 0;
-        }
-       // release(&(shm_table.lock));
           //initialize empty entry in the shm_table id to the id passed to us
-         // acquire(&(shm_table.lock));
 	  shm_table.shm_pages[i].id = id;
-          shm_table.shm_pages[i].frame = mem;
-          //release(&(shm_table.lock));
+          shm_table.shm_pages[i].frame = kalloc();
           
-          memset(mem, 0, PGSIZE);
+          memset(shm_table.shm_pages[i].frame, 0, PGSIZE);
           cprintf("calling mappages");
     	  //if(mappages(curproc->pgdir, (void *)PGROUNDUP(KERNBASE - 4), PGSIZE, V2P(shm_table.shm_pages[i].frame), PTE_W|PTE_U) < 0){
-  /*        acquire(&(shm_table.lock));
     	  if(mappages(curproc->pgdir, (void *)PGROUNDUP(curproc->sz), PGSIZE, V2P(shm_table.shm_pages[i].frame), PTE_W|PTE_U) < 0){
       	    cprintf("allocuvm out of memory (2)\n");
-      	    deallocuvm(curproc->pgdir, 0, KERNBASE - 4);
-      	    kfree(mem);
+      	    deallocuvm(curproc->pgdir, 0, curproc->sz);
+      	    kfree(shm_table.shm_pages[i].frame);
+            release(&(shm_table.lock));
       	    return 0;
     	  } 
 	  else {
+            release(&(shm_table.lock));
             curproc->sz += PGSIZE;
             *pointer = (char *)PGROUNDUP(curproc->sz);
+             cprintf("page has updated!");
+	     return 0;
           }
-          release(&(shm_table.lock));
-        */
+          //release(&(shm_table.lock));
+        
         }
       }
-      //release(&(shm_table.lock));
-        //return (int)pointer;
+//        cprintf("return1");
 //        release(&(shm_table.lock));
-        return 0;
-        break;
-      }
-     }   
-      
-    
+//        return 0;
+//     }
+     }       
+  cprintf("return2");
   release(&(shm_table.lock));
   return 0;
 }
